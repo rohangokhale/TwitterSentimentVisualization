@@ -22,11 +22,7 @@ object StatusStreamer {
       trackedTrendsFile.createNewFile
     
       val uswoeid = 23424977 //united states woid
-
-<<<<<<< HEAD
-=======
       //val twitter = new twitter4j.TwitterFactory(Util.config).getInstance
->>>>>>> refs/remotes/origin/master
       val twitter = new twitter4j.TwitterFactory(t4jAuthInfo.config).getInstance
       val topTrends = twitter.getPlaceTrends(uswoeid)
       val topTrendsArr = topTrends.getTrends
@@ -55,10 +51,8 @@ object StatusStreamer {
       myFilter.track(topTrendsStrings(0), topTrendsStrings(1), topTrendsStrings(2), topTrendsStrings(3), topTrendsStrings(4))
       
       
-<<<<<<< HEAD
-=======
+
       //val twitterStream = new TwitterStreamFactory(Util.config).getInstance
->>>>>>> refs/remotes/origin/master
       val twitterStream = new TwitterStreamFactory(t4jAuthInfo.config).getInstance
       val myListener = Util.simpleStatusListener
       twitterStream.addListener(myListener)
@@ -100,10 +94,7 @@ object Util {
     def onScrubGeo(arg0: Long, arg1: Long) {}
     def onStallWarning(warning: StallWarning) {}
   }
-<<<<<<< HEAD
 
-=======
-  
   
   
   /*
@@ -115,5 +106,5 @@ object Util {
     .build
     * 
     */
->>>>>>> refs/remotes/origin/master
+
 }
