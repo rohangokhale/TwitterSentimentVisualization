@@ -13,6 +13,7 @@ import org.json4s.native.JsonMethods._
 
 object StatusStreamer {
   def main(args: Array[String]){
+      //no change
       //open file to record all tracked trends for the day
       val date = java.time.LocalDate.now.toString
       val trendsfilename = "trackedTrends" + date + ".txt"
