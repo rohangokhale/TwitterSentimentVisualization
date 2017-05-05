@@ -29,6 +29,7 @@ object StatusStreamer {
       val topTrendsStrings: Array[String] = for(trend <- topTrendsArr) yield trend.getName
       for(trend <- topTrendsStrings) println(trend)
       
+      
       //add all new trends to a file containing the tracked trends for the day
       val trackedTrendsSource = Source.fromFile(trendsfilename, "UTF-8")
       val lines = trackedTrendsSource.getLines.toArray
