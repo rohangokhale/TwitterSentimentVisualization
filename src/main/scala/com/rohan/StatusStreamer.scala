@@ -23,7 +23,7 @@ object StatusStreamer {
       val uswoeid = 23424977 //united states woid
 
       //val twitter = new twitter4j.TwitterFactory(Util.config).getInstance
-      val twitter = new twitter4j.TwitterFactory(t4jAuthInfo.config).getInstance
+      val twitter = new twitter4j.TwitterFactory(t4jCredentials.config).getInstance
       val topTrends = twitter.getPlaceTrends(uswoeid)
       val topTrendsArr = topTrends.getTrends
       val topTrendsStrings: Array[String] = for(trend <- topTrendsArr) yield trend.getName
@@ -54,7 +54,7 @@ object StatusStreamer {
       
       
       //val twitterStream = new TwitterStreamFactory(Util.config).getInstance
-      val twitterStream = new TwitterStreamFactory(t4jAuthInfo.config).getInstance
+      val twitterStream = new TwitterStreamFactory(t4jCredentials.config).getInstance
       val myListener = Util.simpleStatusListener
       twitterStream.addListener(myListener)
       twitterStream.filter(myFilter)
