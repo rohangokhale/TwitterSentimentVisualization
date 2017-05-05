@@ -15,13 +15,15 @@ object StatusStreamer {
   def main(args: Array[String]){
       //open file to record all tracked trends for the day
       val date = java.time.LocalDate.now.toString
-      val trendsfilename = "trackedTrends" + date + ".txt"
+      //val trendsfilename = "trackedTrends" + date + ".txt"
+      val trendsfilename = "trackedTrends.txt"
       val trackedTrendsFile = new File(trendsfilename)
       trackedTrendsFile.createNewFile
     
       val uswoeid = 23424977 //united states woid
 
-      val twitter = new twitter4j.TwitterFactory(Util.config).getInstance
+      //val twitter = new twitter4j.TwitterFactory(Util.config).getInstance
+      val twitter = new twitter4j.TwitterFactory(t4jAuthInfo.config).getInstance
       val topTrends = twitter.getPlaceTrends(uswoeid)
       val topTrendsArr = topTrends.getTrends
       val topTrendsStrings: Array[String] = for(trend <- topTrendsArr) yield trend.getName
@@ -42,7 +44,6 @@ object StatusStreamer {
       for(trend <- topTrendsStrings) println(trend)
       trackedTrendsSource.close
       writer.close
-      System.exit(0)
       
       val myFilter = new FilterQuery
       myFilter.track("rangers", "cavs") //track will take strings separated by commas
@@ -50,7 +51,8 @@ object StatusStreamer {
       myFilter.track(topTrendsStrings(0), topTrendsStrings(1), topTrendsStrings(2), topTrendsStrings(3), topTrendsStrings(4))
       
       
-      val twitterStream = new TwitterStreamFactory(Util.config).getInstance
+      //val twitterStream = new TwitterStreamFactory(Util.config).getInstance
+      val twitterStream = new TwitterStreamFactory(t4jAuthInfo.config).getInstance
       val myListener = Util.simpleStatusListener
       twitterStream.addListener(myListener)
       twitterStream.filter(myFilter)
@@ -70,7 +72,7 @@ object StatusStreamer {
 object Util {
   
   def simpleStatusListener = new StatusListener() {
-    val outputfilename = "outputloconly.txt"
+    val outputfilename = "rawtweets.txt"
     var rawCount = 0
     var goodCount = 1
     def onStatus(status: Status){
@@ -78,9 +80,9 @@ object Util {
       println(status.getText)
       
       //if(status.getGeoLocation != null || status.getPlace != null || status.getUser.getLocation != null){
-      if(status.getUser.getLocation != null){
+      if(status.getUser.getLocation != null && status.getLang == "en"){
         val writer = new PrintWriter(new FileWriter(outputfilename, true))
-        writer.println(status.getText + "\t" + "User Location: " + status.getUser.getLocation)
+        writer.println(status.getText.filter(x => x!='\n' && x!='\t') + "\t" + "User Location: " + status.getUser.getLocation)
         writer.close
         goodCount += 1
       }
@@ -94,11 +96,13 @@ object Util {
   
   
   
-  
+  /*
   val config = new twitter4j.conf.ConfigurationBuilder()
     .setOAuthConsumerKey("GDLlQrENYS4aCosCRYnNTja5Y")
     .setOAuthConsumerSecret("BzfDMr8NLctrLHyNsuVLo5QbgNmde44YmGnSMXc1JpkQnJnNZ8")
     .setOAuthAccessToken("1494587119-X1tfkKvE94zrjQPZjMQfjCqMuyLiVPfMpVM0wWX")
     .setOAuthAccessTokenSecret("VQa2MhYfXaGMgv1iC8XhxzsnsP9xDAKzsr5MRcZVZEZ27")
     .build
+    * 
+    */
 }
