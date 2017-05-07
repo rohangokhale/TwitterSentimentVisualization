@@ -48,6 +48,7 @@ object StatusCleaner {
           //filter out stopwords
           //var cleantext = cols(0).split(" ").filter(!stopWords.contains(_)
           //write only remaining words to the file
+          
           //for(word <- cleantext) cleanWriter.println(word + " ")
           cleanWriter.println(trend + "\t" + cols(0) + "\t" + location)
           cleanCount += 1
