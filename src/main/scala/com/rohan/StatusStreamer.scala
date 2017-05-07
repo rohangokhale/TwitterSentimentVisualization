@@ -48,9 +48,9 @@ object StatusStreamer {
       writer.close
       
       val myFilter = new FilterQuery
-      myFilter.track("rangers", "cavs") //track will take strings separated by commas
+      //myFilter.track("rangers", "cavs") //track will take strings separated by commas
       //val terms: Array[String] = Array("New York Rangers", "Ottawa Senators") //track won't take an array of strings
-      myFilter.track(topTrendsStrings(0), topTrendsStrings(1), topTrendsStrings(2), topTrendsStrings(3), topTrendsStrings(4))
+      myFilter.track(topTrendsStrings(0), topTrendsStrings(1), topTrendsStrings(2), topTrendsStrings(3), topTrendsStrings(4), topTrendsStrings(4), topTrendsStrings(5), topTrendsStrings(6), topTrendsStrings(7), topTrendsStrings(8), topTrendsStrings(9))
       
       
       //val twitterStream = new TwitterStreamFactory(Util.config).getInstance
@@ -79,12 +79,10 @@ object Util {
     var goodCount = 1
     def onStatus(status: Status){
       rawCount += 1
-      println(status.getText)
-      
-      //if(status.getGeoLocation != null || status.getPlace != null || status.getUser.getLocation != null){
+      //println(status.getText)
       if(status.getUser.getLocation != null && status.getLang == "en"){
         val writer = new PrintWriter(new FileWriter(outputfilename, true))
-        writer.println(status.getText.filter(x => x!='\n' && x!='\t') + "\t" + "User Location: " + status.getUser.getLocation)
+        writer.println(status.getText.filter(x => x!='\n' && x!='\t' && x!='\r') + "\t" + "User Location: " + status.getUser.getLocation)
         writer.close
         goodCount += 1
       }
