@@ -1,6 +1,7 @@
 package com.rohan
 
 import scala.StringContext
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 import java.lang.String
@@ -44,6 +45,10 @@ object StatusCleaner {
         //println("Checking Location...")//
         val location = locMatcher(cols(1).toUpperCase, LocationList.locMap)
         if (location != null){
+          //filter out stopwords
+          //var cleantext = cols(0).split(" ").filter(!stopWords.contains(_)
+          //write only remaining words to the file
+          //for(word <- cleantext) cleanWriter.println(word + " ")
           cleanWriter.println(trend + "\t" + cols(0) + "\t" + location)
           cleanCount += 1
         }
@@ -75,6 +80,12 @@ object StatusCleaner {
       }
       state //returns null if no state abbreviation was found
       
+    }
+    
+    def filterStopWords(text: String) = {
+      val stopWords = ArrayBuffer[String]()
+      stopWords += ("in", "the", "and", "but")
+      text.filter(!stopWords.contains(_)).toSeq
     }
   }
 }
