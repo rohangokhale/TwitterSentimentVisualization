@@ -46,11 +46,14 @@ object StatusCleaner {
         val location = locMatcher(cols(1).toUpperCase, LocationList.locMap)
         if (location != null){
           //filter out stopwords
-          //var cleantext = cols(0).split(" ").filter(!stopWords.contains(_)
-          //write only remaining words to the file
+          var cleantext = cols(0).split(" ").filter(!stopWordsList.stopWords.contains(_))
           
-          //for(word <- cleantext) cleanWriter.println(word + " ")
-          cleanWriter.println(trend + "\t" + cols(0) + "\t" + location)
+          //write trend to file
+          cleanWriter.print(trend + "\t")
+          //write only remaining words to the file
+          for(word <- cleantext) cleanWriter.print(word + " ")
+          //write location to file
+          cleanWriter.println("\t" + location)
           cleanCount += 1
         }
       }
