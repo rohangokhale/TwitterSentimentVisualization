@@ -1,0 +1,4 @@
+#!/bin/bash
+scala -cp ./TSVScratch-0.0.1-jar-with-dependencies.jar com.rohan.TrainingTestingCreator
+scala -cp ./TSVScratch-0.0.1-jar-with-dependencies.jar com.rohan.Trainer
+scala -cp ./TSVScratch-0.0.1-jar-with-dependencies.jar com.rohan.SentimentAlgTester
