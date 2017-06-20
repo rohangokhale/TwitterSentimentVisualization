@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="Visualizer for how each state in the country feels about the latest trending topics">
+  <meta name="author" content="Rohan Gokhale">
+
+  <title>Twitter Sentiment Visualizer</title>
+
+    <!-- Bootstrap core CSS
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+  -->
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+  -->
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <![endif]-->
+
+      <!-- Custom styles for this template -->
+      <link href="starter-template.css" rel="stylesheet">
+
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+      <style>
+
+        .dropdown{
+          margin: auto;
+          width: 50%;
+          text-align: center;
+          border: 3px solid #73AD21;
+          padding: 10px;
+        }
+
+        .legend{
+          margin: auto;
+          width: 500px;
+          height: 40px;
+          text-align: center;	
+        } 
+        .state{
+          fill: none;
+          stroke: #a9a9a9;
+          stroke-width: 1;
+        }
+        .state:hover{
+          fill-opacity:0.5;
+        }
+
+        .about{
+          padding-top: 50px;
+          padding-bottom: 50px;
+          text-align: center;
+        }
+
+        .contact{
+          padding-top: 50px;
+          padding-bottom: 50px;
+          text-align: center;
+        }
+
+        #tooltip {
+          position: absolute;
+          text-align: center;
+          padding: 20px;
+          margin: 10px;
+          font: 12px sans-serif;
+          background: lightsteelblue;
+          border: 1px;
+          border-radius: 2px;
+          pointer-events: none;
+        }
+        #tooltip h4{
+          margin:0;
+          font-size:14px;
+        }
+        #tooltip{
+          background:rgba(0,0,0,0.9);
+          border:1px solid grey;
+          border-radius:5px;
+          font-size:12px;
+          width:auto;
+          padding:4px;
+          color:white;
+          opacity:0;
+        }
+        #tooltip table{
+          table-layout:fixed;
+        }
+        #tooltip tr td{
+          padding:0;
+          margin:0;
+        }
+        #tooltip tr td:nth-child(1){
+          width:50px;
+        }
+        #tooltip tr td:nth-child(2){
+          text-align:center;
+        }
+
+        #statesvg{
+          margin-left:auto;
+          margin-right:auto;
+          display:block;
+        }
+
+        #choice{
+          font-weight:bold;
+          font-size:2.5em;
+        }
+
+        #left{
+          float:left;
+          text-align:right;
+          width:100px;
+          height:40px;
+          font-weight:bold;
+        }
+        #right{
+          float:right;
+          text-align:left;
+          width:100px;
+          height:40px;
+          font-weight:bold;
+        }
+      </style>
+    </head>
+
+    <body>
+      <script src="http://code.jquery.com/jquery-latest.js"></script>
+      <script src="http://d3js.org/d3.v3.min.js"></script>
+
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Twitter Sentiment Visualizer</a>
+          </div>
+          <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="starter-template">
+          <h1>See How Twitter Feels!</h1>
+          <p class="lead">Select from the list of twitter's most recent trending topics to see how each state across the U.S. feels about it.<br>
+          Hover over a state to see the number of tweets collected from each state, as well as the average sentiment score of those tweets. Scores range from 0 ( most negative) to 100 (most positive).</p>
+          </div>
+        </div><!-- /.container -->
+
+        <div class="dropdown">
+          <select id="trendselect" class="form-control" onchange="displayChoice()">
+            <option selected disabled value="none">Choose a Recent Trending Topic Here</option>
+          </select>                                  
+        </div>
+
+        <p id="choice" align="center"></p>
+
+        <div class="legend" id="legendContainer">
+         <div id="left">Negative (0) </div>
+         <svg width="300" height="40" id="legendsvg"></svg>
+         <div id="right"> (100) Positive</div>
+       </div>
+
+       <!--Create and fill the graident legend for the states map-->
+       <script>
+         var legSvg = d3.select('#legendsvg');
+         var defs = legSvg.append("defs");
+         var gradient = defs.append("linearGradient")
+         .attr("id", "gradient");
+
+         gradient.append("stop")
+         .attr("offset", "0%")
+         .attr("stop-color", "#641E16");
+         gradient.append("stop")
+         .attr("offset", "50%")
+         .attr("stop-color", "#F5B7B1");
+         gradient.append("stop")
+         .attr("offset", "50%")
+         .attr("stop-color", "#A9DFBF");
+         gradient.append("stop")
+         .attr("offset", "100%")
+         .attr("stop-color", "#196F3D");
+         legSvg.append("rect")
+         .attr("width", 300)
+         .attr("height", 40)
+         .attr("fill", "url(#gradient)");
+       </script>
+
+
+       <div id="tooltip"></div><!-- div to hold tooltip. -->
+       <svg width="960" height="600" id="statesvg"></svg> <!-- svg to hold the map. -->
+       <script src="uStates.js"></script> <!-- creates uStates. -->
+
+       <script>
+        var select = document.getElementById("trendselect");
+        var option = document.createElement("option");
+        var getTrends = $.getJSON("http://104.154.54.159/php/gettrends.php");
+        getTrends.done(function(data) {
+          console.log(data);
+          console.log(data[0].trend);
+          console.log(data.length);
+
+          var select = document.getElementById("trendselect");
+          var index;
+          for(index=0; index < data.length; index++){
+            console.log(data[index].trend)
+          }
+          index=0;
+          for(index=0; index < data.length; index++){
+            var option = document.createElement("option");
+            option.text=data[index].trend;
+            option.value=data[index].trend;
+            select.appendChild(option);
+          }
+        })
+
+        var emptyData = {};
+        makeMap(emptyData);
+
+
+        function displayChoice() {
+          document.getElementById("choice").innerHTML = "Trend: " + select.value;
+          var mapData = $.getJSON("http://104.154.54.159/php/getmapdata.php?selectedTrend="+encodeURIComponent(select.value));
+          mapData.done(function(data) {
+            console.log(data);
+            var index;
+            for(index=0; index < data.length; index++){
+              console.log(data[index].location);
+              console.log(data[index].avgscore);
+            }
+
+            makeMap(data);
+          })
+        }
+
+        function makeMap(data){
+          function tooltipHtml(n, d){     /* function to create html content string in tooltip div. */
+            return "<h4>"+n+"</h4><table>"+
+            "<tr><td>Score</td><td>"+Math.round((d.score)*100.0)+"</td></tr>"+
+            "<tr><td>Tweets</td><td>"+(d.count)+"</td></tr>"+
+            "</table>";
+          }
+
+          var d3MapData = {};
+          for(index=0; index < data.length; index++){
+            var stateData=data[index];
+            d3MapData[stateData.location]={score:parseFloat(stateData.avgscore), 
+              color:d3.color("white"),
+              count:parseFloat(stateData.cnt)};
+            }
+            console.log(d3MapData);
+
+            var loadedData ={};     /* populated data, weird way */       
+            ["HI", "AK", "FL", "SC", "GA", "AL", "NC", "TN", "RI", "CT", "MA",
+            "ME", "NH", "VT", "NY", "NJ", "PA", "DE", "MD", "WV", "KY", "OH", 
+            "MI", "WY", "MT", "ID", "WA", "DC", "TX", "CA", "AZ", "NV", "UT", 
+            "CO", "NM", "OR", "ND", "SD", "NE", "IA", "MS", "IN", "IL", "MN", 
+            "WI", "MO", "AR", "OK", "KS", "LS", "VA"]
+            .forEach(function(d){ 
+              for(index=0; index < data.length; index++){
+                if(d==data[index].location){
+                  loadedData[data[index].location]={score:parseFloat(data[index].avgscore), 
+                    count:parseInt(data[index].cnt)}; 
+                    if(parseFloat(data[index].avgscore) < 0.5)
+                      loadedData[data[index].location].color=d3.interpolate("#641E16", "#F5B7B1")((parseFloat(data[index].avgscore))*2.0);
+                    if(parseFloat(data[index].avgscore) > 0.5)
+                      loadedData[data[index].location].color=d3.interpolate("#A9DFBF", "#196F3D")((parseFloat(data[index].avgscore)-0.5)*2.0);
+                    if(parseFloat(data[index].avgscore) == 0.5)
+                      loadedData[data[index].location].color=d3.color("white");
+
+                  }
+                }
+                if(loadedData[d]==null)
+                  loadedData[d]={score:0.5, count:0, color:"white"};
+              });
+            console.log(loadedData);
+
+            /* draw states on id #statesvg */       
+            uStates.draw("#statesvg", loadedData, tooltipHtml);
+            d3.select(self.frameElement).style("height", "600px"); 
+
+          }
+
+        </script>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="./js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    <div class="container">
+      <div id="about" class="about">
+        <h1>About</h1>
+        <p class="lead">twitterfeels is an interactive tool for seeing how people in each state feel about twitter's trending topics, developed by Rohan Gokhale.
+        </p>
+        <h1>Behind the Scenes</h1>
+        <p class="lead">
+          All of the code that collects, cleans, and peforms sentiment analysis on tweets is written in Scala, and can be found on <a href="https://github.com/rohangokhale/TwitterSentimentVisualization">github</a>. About 300k tweets that contain or relate to the current trending twitter topics are collected each day. This is done with the help of twitter4j, a twitter API for Java (all Java libraries can be used with Scala).
+          Then these tweets are scored for sentiment using an algorithm based on a naive-bayes classifier. The classifer was trained using a dataset of scored
+          tweets from the University of Michigan, which can be found <a href="https://inclass.kaggle.com/c/si650winter11/data">here</a>.</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="contact" class="about">
+        <h1>Contact</h1>
+        <p class="lead">If you have any question, comments, suggestions, or cookies, please contact me at rohangokhale@gmail.com.
+        </p>
+      </div>
+    </div>
+
+  </body>
+  </html>
