@@ -13,6 +13,8 @@ import java.time.LocalDate
 
 object StatusCleaner {
   def main(args: Array[String]){
+    //usage: [rawTweetsFilename, cleanTweetsFilename, trackedTrendsFilename]
+
     //create clean tweets file
     //val date = java.time.LocalDate.now.toString
     //val rawfilename = "rawTweets" + java.time.LocalDate.now.toString + ".txt"
@@ -37,24 +39,18 @@ object StatusCleaner {
     var cleanCount = 0
     
     
-    
-    
     /////////////////////////////////
     for(line <- bufferedSource.getLines) {
       rawCount += 1
       val cols = line.split("\t").map(_.trim.toLowerCase)
       val trend = trendMatcher(cols(0), trackedTrends)
-      //println(trend)//
       if (trend != null){
-        //println("Checking Location...")//
         val location = locMatcher(cols(1).toUpperCase, LocationList.locMap)
         if (location != null){
           //filter out all punctuation
           var rawtext= filterPunctuation(cols(0))
           //filter out stopwords
-          //var cleantext = rawtext.split(" ").filter(!StopWordsList.stopWords.contains(_))
           var cleantext = filterStopWords(rawtext.split(" "))
-          
           //write trend to file
           cleanWriter.print(trend + "\t")
           //write only remaining words to the file
@@ -65,51 +61,45 @@ object StatusCleaner {
         }
       }
     }
-
-    
     /////////////////////////////
     println("rawCount: " + rawCount + "cleanCount: " + cleanCount)
     bufferedSource.close
     cleanWriter.close
-    
-    
   }
   
   def filterPunctuation(text: String) = {
       var cleanText = text.filter(x => x!='.' && x!= ',' && x!='-' && x!='$' && x!='*' && x!=';' && x!='"' && x!=''')
       cleanText
-    }
+  }
     
-    def trendMatcher(status: String, trends: Array[String]) = {
-      var matchedTrend: String = null
-      for(trend <- trends if matchedTrend == null){
-        //println(status + "Trend: " + trend)//
-        if(status.contains(trend)) matchedTrend = trend
-      }
-      matchedTrend //return null if there are no matches
+  def trendMatcher(status: String, trends: Array[String]) = {
+    var matchedTrend: String = null
+    for(trend <- trends if matchedTrend == null){
+      if(status.contains(trend)) matchedTrend = trend
     }
+    matchedTrend //return null if there are no matches
+  }
     
-    def locMatcher(tLoc: String, locMap: Map[String, String]) = {
-      var state: String = null
-      var userLocation = tLoc.filter(x=> x!='.' && x!= ',' && x!=';' && x!=':')
-      var words = userLocation.split("\\s+")
-      for(word <- words if state == null){
-      	for ((k, v) <- locMap if state == null) {
-        	if(word == k) state = v //for all abbreviations and locations like "Indiana" with no spaces
-      	}
-      }
-      for((k, v) <- locMap if state == null){//for locations like 'New Jersey', 'New Mexico' with spaces
-      	if(k.split("\\s+").length > 1){
-      		if(tLoc.contains(k)) state = v
-      	}
-      }
-      state //returns null if no state abbreviation was found
+  def locMatcher(tLoc: String, locMap: Map[String, String]) = {
+    var state: String = null
+    var userLocation = tLoc.filter(x=> x!='.' && x!= ',' && x!=';' && x!=':')
+    var words = userLocation.split("\\s+")
+    for(word <- words if state == null){
+    	for ((k, v) <- locMap if state == null) {
+      	if(word == k) state = v //for all abbreviations and locations like "Indiana" with no spaces
+    	}
     }
+    for((k, v) <- locMap if state == null){//for locations like 'New Jersey', 'New Mexico' with spaces
+    	if(k.split("\\s+").length > 1){
+    		if(tLoc.contains(k)) state = v
+    	}
+    }
+    state //returns null if no state abbreviation was found
+  }
     
-    def filterStopWords(text: Array[String]) = {
-      text.filter(!StopWordsList.stopWords.contains(_))
-    }
-  
+  def filterStopWords(text: Array[String]) = {
+    text.filter(!StopWordsList.stopWords.contains(_))
+  }
 }
 
 

@@ -8,6 +8,7 @@ import java.io.File
 
 object SentimentScorer {
   def main(args: Array[String]){
+    //usage: [cleanTweetsFilename], [scoresOutputFilename]
     val posWordsFilename = "posWords.txt"
     val negWordsFilename = "negWords.txt"
     //val tweetsFilename = "cleanTweets" + java.time.LocalDate.now.toString + ".txt"
@@ -20,10 +21,9 @@ object SentimentScorer {
     //get yesterday's date to add to 'date' column in the scores file
     val date = java.time.LocalDate.now.minusDays(1).toString
     
-    //***Load map of positive words
+    //Load map of positive words
     val posWordsMap = scala.collection.mutable.Map[String, Int]()
     val negWordsMap = scala.collection.mutable.Map[String, Int]()
-    //bufferedSource.getLines.map(_.split("\t")).map(posWordsMap(_(0))=_(1).toInt)
     val posBufferedSource = io.Source.fromFile(posWordsFilename)
     for(line <- posBufferedSource.getLines){
       var cols = line.split("\t")
@@ -36,26 +36,22 @@ object SentimentScorer {
     }
     
 
-    //***Set up the output file
+    //Set up the output file
     val scoresFile = new File(scoresFilename)
     scoresFile.createNewFile
     val scoresWriter = new PrintWriter(new FileWriter(scoresFilename, true))
-    //***Score each tweet, and write the trend, score, and location to a file
-    //Format (tab delimited):
-    //trend  score  location
+    //Score each tweet, and write the trend, score, and location to a file
+    //Format (tab delimited): trend  score  location
     val tweetsBufferedSource = io.Source.fromFile(tweetsFilename)
     for(line <- tweetsBufferedSource.getLines){
       val cols = line.split("\t")
       val text = cols(textCol)
       val score = scoreTweet(text)
-      //println(cols(trendCol) + "\t" + scoreTweet(text) + "\t" + cols(locCol))
       if(score == 0 || score == 1)
         scoresWriter.println(cols(trendCol) + "\t" + score + "\t" + cols(locCol) + "\t" + date)
     }
     scoresWriter.close
 
-    
-    
     def scoreTweet(text: String) = {
       val words = text.split(" ")
       var finalScore = 0
@@ -64,10 +60,7 @@ object SentimentScorer {
       for(word <- words){
         val posPoints = posWordsMap.getOrElse(word, 0)
         val negPoints = negWordsMap.getOrElse(word, 0)
-        //if(thisPosPoints > 10000) println(word + ": posPoints:" + thisPosPoints)
-        //if(thisNegPoints > 10000) println(word + ": negPoints:" + thisNegPoints)
         val wordPoints = (posPoints-negPoints).toDouble/(posPoints+negPoints).toDouble
-        //println(word + " points: " + wordPoints)
         if(!wordPoints.isNaN) {
           //if(wordPoints > 0.2 || wordPoints < -0.2)
             totPoints += wordPoints
