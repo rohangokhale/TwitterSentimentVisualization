@@ -1,5 +1,6 @@
 # Twitter Sentiment Visualization
 
+
 This a project that collects and cleans tweets relating to current trending topics, and performs sentiment analysis on them using a
 naive bayes algorithm. All of this is code is written in Scala. These scores are stored in a SQL database, and a visualization of the
 data can be found at www.twitterfeels.com (updated daily). The visualization was done using D3.js.
