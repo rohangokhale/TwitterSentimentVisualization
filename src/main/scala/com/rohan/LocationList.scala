@@ -1,8 +1,6 @@
 package com.rohan
 
 object LocationList{
-
-
   val locMap = Map(
   	"ALABAMA"->"AL",
   	"AL" -> "AL",
