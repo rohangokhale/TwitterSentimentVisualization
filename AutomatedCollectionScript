@@ -14,10 +14,10 @@ do
 	scala -cp ./TSVScratch-0.0.1-jar-with-dependencies.jar com.rohan.StatusCleaner rawTweets$storeddate.txt cleanTweets$storeddate.txt trackedTrends$storeddate.txt
 	scala -cp ./TSVScratch-0.0.1-jar-with-dependencies.jar com.rohan.SentimentScorer cleanTweets$storeddate.txt scores$storeddate.txt
 
-	mysql -u root -pgokegoke1 TSVdb -e "delete from scores;"
-	mysql -u root -pgokegoke1 TSVdb -e "load data local infile 'scores$storeddate.txt' into table scores fields terminated by '\t' lines terminated by '\n' (trend, score, location, date);"
-	mysql -u root -pgokegoke1 TSVdb -e "delete from aggscores;"
-	mysql -u root -pgokegoke1 TSVdb -e "insert into aggscores (trend, location, avgscore, count, date) select trend, location, avg(score), count(*), date from scores group by trend, location;"
+	mysql -u root -psecret TSVdb -e "delete from scores;"
+	mysql -u root -psecret TSVdb -e "load data local infile 'scores$storeddate.txt' into table scores fields terminated by '\t' lines terminated by '\n' (trend, score, location, date);"
+	mysql -u root -psecret TSVdb -e "delete from aggscores;"
+	mysql -u root -psecret TSVdb -e "insert into aggscores (trend, location, avgscore, count, date) select trend, location, avg(score), count(*), date from scores group by trend, location;"
 	
 	echo "Database updated" >> log.txt
 	let "daysrunning+=1"
